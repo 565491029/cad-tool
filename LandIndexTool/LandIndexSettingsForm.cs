@@ -16,9 +16,9 @@ namespace LandIndexTool
         private static readonly Color MutedTextColor = ColorTranslator.FromHtml("#6B7280");
         private static readonly Color HeaderBackground = ColorTranslator.FromHtml("#EFF6FF");
         private const int SectionHeaderHeight = 70;
-        private const int InputLabelHeight = 34;
-        private const int InputBoxHeight = 32;
-        private const int InputRowHeight = 78;
+        private const int InputLabelHeight = 28;
+        private const int InputBoxHeight = 30;
+        private const int InputRowHeight = 68;
         private const int LeftPanelMinWidth = 380;
         private const int LeftPanelPreferredWidth = 520;
         private const int ReviewPanelMinWidth = 560;
@@ -307,7 +307,7 @@ namespace LandIndexTool
                 BackColor = CardBackground
             };
             container.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(3 * InputRowHeight + 8)));
-            container.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(2 * InputRowHeight + 8)));
+            container.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(2 * InputRowHeight + 52)));
 
             var ruleGrid = CreateRulePanel();
             ruleGrid.Padding = new WinForms.Padding(0);
@@ -318,15 +318,31 @@ namespace LandIndexTool
             _bikeAreaBox = AddRuleTextBox(ruleGrid, 1, 1, "每个非机动车位折算面积（㎡）", FormatText(Settings.BikeAreaPerSpace));
             _motorPer100Box = AddRuleTextBox(ruleGrid, 0, 2, "机动车位数 / 100㎡", FormatText(Settings.MotorSpacesPer100));
 
-            var factorGrid = CreateGridPanel(2, 2);
+            var factorGrid = CreateFactorPanel();
             factorGrid.Padding = new WinForms.Padding(0);
             container.Controls.Add(factorGrid, 0, 1);
-            _grassPaverFactorBox = AddTextBox(factorGrid, 0, 0, "植草砖系数", FormatText(Settings.GrassPaverFactor));
-            _roofGreen1FactorBox = AddTextBox(factorGrid, 1, 0, "屋面绿化1系数", FormatText(Settings.RoofGreen1Factor));
-            _roofGreen2FactorBox = AddTextBox(factorGrid, 0, 1, "屋面绿化2系数", FormatText(Settings.RoofGreen2Factor));
-            _roofGreen3FactorBox = AddTextBox(factorGrid, 1, 1, "屋面绿化3系数", FormatText(Settings.RoofGreen3Factor));
+            var formulaNote = CreateGreenFormulaNote();
+            factorGrid.Controls.Add(formulaNote, 0, 0);
+            factorGrid.SetColumnSpan(formulaNote, 2);
+            _grassPaverFactorBox = AddTextBox(factorGrid, 0, 1, "植草砖系数", FormatText(Settings.GrassPaverFactor));
+            _roofGreen1FactorBox = AddTextBox(factorGrid, 1, 1, "屋面绿化1系数", FormatText(Settings.RoofGreen1Factor));
+            _roofGreen2FactorBox = AddTextBox(factorGrid, 0, 2, "屋面绿化2系数", FormatText(Settings.RoofGreen2Factor));
+            _roofGreen3FactorBox = AddTextBox(factorGrid, 1, 2, "屋面绿化3系数", FormatText(Settings.RoofGreen3Factor));
 
             return container;
+        }
+
+        private static WinForms.Control CreateGreenFormulaNote()
+        {
+            return new WinForms.Label
+            {
+                Text = "总绿地 = 绿地 + 植草砖面积×植草砖系数 + 屋面绿化面积1×屋面绿化系数1 + 屋面绿化面积2×屋面绿化系数2 + 屋面绿化面积3×屋面绿化系数3",
+                Dock = WinForms.DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleLeft,
+                ForeColor = MutedTextColor,
+                Font = new Font("Microsoft YaHei UI", 8.2F),
+                Padding = ScaledPadding(4, 2, 0, 0)
+            };
         }
 
         private WinForms.Control CreateLayerContent()
@@ -620,6 +636,25 @@ namespace LandIndexTool
             panel.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 33.3F));
             panel.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 33.3F));
             panel.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 33.4F));
+            return panel;
+        }
+
+        private static WinForms.TableLayoutPanel CreateFactorPanel()
+        {
+            var panel = new WinForms.TableLayoutPanel
+            {
+                Dock = WinForms.DockStyle.Fill,
+                ColumnCount = 2,
+                RowCount = 3,
+                Padding = ScaledPadding(0),
+                BackColor = CardBackground,
+                MinimumSize = new Size(0, Scale(2 * InputRowHeight + 52))
+            };
+            panel.ColumnStyles.Add(new WinForms.ColumnStyle(WinForms.SizeType.Percent, 50));
+            panel.ColumnStyles.Add(new WinForms.ColumnStyle(WinForms.SizeType.Percent, 50));
+            panel.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(44)));
+            panel.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 50));
+            panel.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 50));
             return panel;
         }
 
