@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationPackage
+  SchemaVersion="1.0"
+  AutodeskProduct="AutoCAD"
+  ProductType="Application"
+  Name="独狼建筑指标统计控制台"
+  AppVersion="1.0.0"
+  Description="按地块范围、建筑轮廓和指标图层自动统计建筑指标表。"
+  Author="Dulang">
+  <CompanyDetails Name="Dulang" />
+  <Components Description="独狼建筑指标统计控制台">
+    <RuntimeRequirements OS="Win64" Platform="AutoCAD*" SeriesMin="R20.1" SeriesMax="R24.3" />
+    <ComponentEntry
+      AppName="DulangLandIndexTool"
+      AppType=".Net"
+      Version="1.0.0"
+      ModuleName="./Contents/Win64/LandIndexTool.dll"
+      AppDescription="独狼建筑指标统计控制台"
+      LoadOnAutoCADStartup="True"
+      LoadOnCommandInvocation="True">
+      <Commands GroupName="DulangLandIndexTool">
+        <Command Global="dulang1" Local="dulang1" />
+        <Command Global="JZMJYDUPDATE" Local="JZMJYDUPDATE" />
+        <Command Global="JZMJYDHELP" Local="JZMJYDHELP" />
+      </Commands>
+    </ComponentEntry>
+  </Components>
+</ApplicationPackage>
