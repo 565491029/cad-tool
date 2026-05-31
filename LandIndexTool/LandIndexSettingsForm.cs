@@ -18,7 +18,7 @@ namespace LandIndexTool
         private const int SectionHeaderHeight = 70;
         private const int InputLabelHeight = 34;
         private const int InputBoxHeight = 32;
-        private const int InputRowHeight = 88;
+        private const int InputRowHeight = 78;
         private const int LeftPanelMinWidth = 380;
         private const int LeftPanelPreferredWidth = 520;
         private const int ReviewPanelMinWidth = 560;
@@ -285,7 +285,7 @@ namespace LandIndexTool
                 MinimumSize = new Size(Scale(LeftPanelMinWidth - 24), 0)
             };
             stack.ColumnStyles.Add(new WinForms.ColumnStyle(WinForms.SizeType.Percent, 100));
-            stack.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(480)));
+            stack.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(500)));
             stack.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(610)));
             stack.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(300)));
             scroll.Controls.Add(stack);
@@ -302,13 +302,12 @@ namespace LandIndexTool
             {
                 Dock = WinForms.DockStyle.Fill,
                 ColumnCount = 1,
-                RowCount = 3,
+                RowCount = 2,
                 Padding = ScaledPadding(12, 2, 12, 10),
                 BackColor = CardBackground
             };
-            container.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(220)));
-            container.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(100)));
-            container.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 100));
+            container.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(3 * InputRowHeight + 8)));
+            container.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(2 * InputRowHeight + 8)));
 
             var ruleGrid = CreateRulePanel();
             ruleGrid.Padding = new WinForms.Padding(0);
@@ -319,23 +318,14 @@ namespace LandIndexTool
             _bikeAreaBox = AddRuleTextBox(ruleGrid, 1, 1, "每个非机动车位折算面积（㎡）", FormatText(Settings.BikeAreaPerSpace));
             _motorPer100Box = AddRuleTextBox(ruleGrid, 0, 2, "机动车位数 / 100㎡", FormatText(Settings.MotorSpacesPer100));
 
-            var factorGrid = CreateGridPanel(4, 1);
+            var factorGrid = CreateGridPanel(2, 2);
             factorGrid.Padding = new WinForms.Padding(0);
             container.Controls.Add(factorGrid, 0, 1);
             _grassPaverFactorBox = AddTextBox(factorGrid, 0, 0, "植草砖系数", FormatText(Settings.GrassPaverFactor));
-            _roofGreen1FactorBox = AddTextBox(factorGrid, 1, 0, "屋绿1系数", FormatText(Settings.RoofGreen1Factor));
-            _roofGreen2FactorBox = AddTextBox(factorGrid, 2, 0, "屋绿2系数", FormatText(Settings.RoofGreen2Factor));
-            _roofGreen3FactorBox = AddTextBox(factorGrid, 3, 0, "屋绿3系数", FormatText(Settings.RoofGreen3Factor));
+            _roofGreen1FactorBox = AddTextBox(factorGrid, 1, 0, "屋面绿化1系数", FormatText(Settings.RoofGreen1Factor));
+            _roofGreen2FactorBox = AddTextBox(factorGrid, 0, 1, "屋面绿化2系数", FormatText(Settings.RoofGreen2Factor));
+            _roofGreen3FactorBox = AddTextBox(factorGrid, 1, 1, "屋面绿化3系数", FormatText(Settings.RoofGreen3Factor));
 
-            container.Controls.Add(new WinForms.Label
-            {
-                Text = "绿地率可填 10 或 10% 或 0.1，均表示 10%。非机动车最低面积 = 折算面积 / 100 × 位数 / 100㎡ × 每位面积；机动车（个）= 折算面积 / 100 × 机动车位数 / 100㎡。",
-                Dock = WinForms.DockStyle.Fill,
-                TextAlign = ContentAlignment.MiddleLeft,
-                ForeColor = MutedTextColor,
-                Font = new Font("Microsoft YaHei UI", 8.5F),
-                Padding = ScaledPadding(2, 4, 2, 0)
-            }, 0, 2);
             return container;
         }
 
@@ -645,7 +635,7 @@ namespace LandIndexTool
                 MinimumSize = new Size(0, Scale(InputRowHeight))
             };
             inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(InputLabelHeight)));
-            inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 100));
+            inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(InputBoxHeight + 8)));
             inner.Controls.Add(new WinForms.Label
             {
                 Text = label,
@@ -675,7 +665,7 @@ namespace LandIndexTool
                 MinimumSize = new Size(0, Scale(InputRowHeight))
             };
             inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(InputLabelHeight)));
-            inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 100));
+            inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(InputBoxHeight + 8)));
             inner.Controls.Add(new WinForms.Label
             {
                 Text = label,
@@ -709,7 +699,7 @@ namespace LandIndexTool
                 MinimumSize = new Size(0, Scale(InputRowHeight))
             };
             inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(InputLabelHeight)));
-            inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 100));
+            inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(InputBoxHeight + 8)));
             inner.Controls.Add(new WinForms.Label
             {
                 Text = label,
@@ -729,7 +719,7 @@ namespace LandIndexTool
         {
             return new WinForms.TextBox
             {
-                Dock = WinForms.DockStyle.Fill,
+                Dock = WinForms.DockStyle.Top,
                 Text = value,
                 AutoSize = false,
                 Multiline = false,
