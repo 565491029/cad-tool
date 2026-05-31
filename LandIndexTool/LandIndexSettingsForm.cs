@@ -15,6 +15,14 @@ namespace LandIndexTool
         private static readonly Color TextColor = ColorTranslator.FromHtml("#1F2937");
         private static readonly Color MutedTextColor = ColorTranslator.FromHtml("#6B7280");
         private static readonly Color HeaderBackground = ColorTranslator.FromHtml("#EFF6FF");
+        private const int SectionHeaderHeight = 70;
+        private const int InputLabelHeight = 34;
+        private const int InputBoxHeight = 32;
+        private const int InputRowHeight = 88;
+        private const int LeftPanelMinWidth = 380;
+        private const int LeftPanelPreferredWidth = 520;
+        private const int ReviewPanelMinWidth = 560;
+        private static readonly float LayoutScale = GetLayoutScale();
 
         private WinForms.RadioButton _unitMmButton;
         private WinForms.RadioButton _unitMButton;
@@ -64,14 +72,58 @@ namespace LandIndexTool
             FormBorderStyle = WinForms.FormBorderStyle.Sizable;
             MaximizeBox = true;
             MinimizeBox = false;
-            AutoScaleMode = WinForms.AutoScaleMode.Dpi;
-            ClientSize = new Size(1280, 900);
-            MinimumSize = new Size(1120, 760);
+            AutoScaleMode = WinForms.AutoScaleMode.None;
             Font = new Font("Microsoft YaHei UI", 9.5F);
             BackColor = ConsoleBackground;
+            ApplyInitialWindowSize();
 
             BuildConsoleLayout(seeds ?? Enumerable.Empty<AreaOverrideSeed>());
             Shown += (s, e) => ApplySafeSplitterDistance();
+            ResizeEnd += (s, e) => ApplySafeSplitterDistance();
+        }
+
+        private static float GetLayoutScale()
+        {
+            var baseHeight = 15f;
+            var menuFontHeight = Math.Max(baseHeight, WinForms.SystemInformation.MenuFont.Height);
+            return Math.Max(1f, Math.Min(2.0f, menuFontHeight / baseHeight));
+        }
+
+        private static int Scale(int value)
+        {
+            return (int)Math.Ceiling(value * LayoutScale);
+        }
+
+        private static Size ScaledSize(int width, int height)
+        {
+            return new Size(Scale(width), Scale(height));
+        }
+
+        private static WinForms.Padding ScaledPadding(int all)
+        {
+            return new WinForms.Padding(Scale(all));
+        }
+
+        private static WinForms.Padding ScaledPadding(int left, int top, int right, int bottom)
+        {
+            return new WinForms.Padding(Scale(left), Scale(top), Scale(right), Scale(bottom));
+        }
+
+        private void ApplyInitialWindowSize()
+        {
+            var workingArea = WinForms.Screen.FromPoint(WinForms.Cursor.Position).WorkingArea;
+            var margin = Scale(48);
+            var maxWidth = Math.Max(Scale(900), workingArea.Width - margin);
+            var maxHeight = Math.Max(Scale(620), workingArea.Height - margin);
+            var desired = ScaledSize(1360, 840);
+            var minimum = ScaledSize(980, 660);
+            ClientSize = new Size(Math.Min(desired.Width, maxWidth), Math.Min(desired.Height, maxHeight));
+            MinimumSize = new Size(Math.Min(minimum.Width, maxWidth), Math.Min(minimum.Height, maxHeight));
+
+            if (workingArea.Width < Scale(1180) || workingArea.Height < Scale(760))
+            {
+                WindowState = WinForms.FormWindowState.Maximized;
+            }
         }
 
         private void BuildConsoleLayout(IEnumerable<AreaOverrideSeed> seeds)
@@ -81,13 +133,13 @@ namespace LandIndexTool
                 Dock = WinForms.DockStyle.Fill,
                 ColumnCount = 1,
                 RowCount = 4,
-                Padding = new WinForms.Padding(14),
+                Padding = ScaledPadding(14),
                 BackColor = ConsoleBackground
             };
-            main.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, 82));
-            main.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, 104));
+            main.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(96)));
+            main.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(132)));
             main.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 100));
-            main.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, 64));
+            main.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(70)));
             Controls.Add(main);
 
             main.Controls.Add(CreateTitlePanel(), 0, 0);
@@ -97,7 +149,8 @@ namespace LandIndexTool
             {
                 Dock = WinForms.DockStyle.Fill,
                 FixedPanel = WinForms.FixedPanel.Panel1,
-                SplitterWidth = 8,
+                SplitterDistance = Scale(LeftPanelPreferredWidth),
+                SplitterWidth = Scale(8),
                 BackColor = ConsoleBackground
             };
             _mainSplit = split;
@@ -112,7 +165,7 @@ namespace LandIndexTool
         private WinForms.Control CreateTitlePanel()
         {
             var card = CreateCardShell();
-            card.Padding = new WinForms.Padding(20, 14, 20, 12);
+            card.Padding = ScaledPadding(20, 14, 20, 12);
             var layout = new WinForms.TableLayoutPanel
             {
                 Dock = WinForms.DockStyle.Fill,
@@ -120,7 +173,7 @@ namespace LandIndexTool
                 RowCount = 2
             };
             layout.ColumnStyles.Add(new WinForms.ColumnStyle(WinForms.SizeType.Percent, 100));
-            layout.ColumnStyles.Add(new WinForms.ColumnStyle(WinForms.SizeType.Absolute, 220));
+            layout.ColumnStyles.Add(new WinForms.ColumnStyle(WinForms.SizeType.Absolute, Scale(220)));
             layout.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 58));
             layout.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 42));
             card.Controls.Add(layout);
@@ -167,19 +220,20 @@ namespace LandIndexTool
                 return;
             }
 
-            var panel1Min = Math.Min(320, Math.Max(80, available / 4));
-            var panel2Min = Math.Min(420, Math.Max(120, available / 3));
+            var panel1Min = Math.Min(Scale(LeftPanelMinWidth), Math.Max(Scale(120), available / 4));
+            var panel2Min = Math.Min(Scale(ReviewPanelMinWidth), Math.Max(Scale(180), available / 3));
             if (available <= panel1Min + panel2Min)
             {
-                panel1Min = Math.Max(60, available / 4);
-                panel2Min = Math.Max(80, available / 3);
+                panel1Min = Math.Max(Scale(120), available / 3);
+                panel2Min = Math.Max(Scale(180), available / 3);
             }
 
             _mainSplit.Panel1MinSize = 0;
             _mainSplit.Panel2MinSize = 0;
 
             var maxDistance = Math.Max(1, available - panel2Min);
-            var distance = Math.Min(430, maxDistance);
+            var preferred = Math.Min(Scale(LeftPanelPreferredWidth), Math.Max(Scale(LeftPanelMinWidth), available / 3));
+            var distance = Math.Min(preferred, maxDistance);
             distance = Math.Max(panel1Min, distance);
             if (distance > 0 && distance < available)
             {
@@ -197,7 +251,7 @@ namespace LandIndexTool
                 ColumnCount = 4,
                 RowCount = 1,
                 BackColor = ConsoleBackground,
-                Padding = new WinForms.Padding(0, 10, 0, 10)
+                Padding = ScaledPadding(0, 10, 0, 10)
             };
             for (var i = 0; i < 4; i++)
             {
@@ -218,7 +272,7 @@ namespace LandIndexTool
                 Dock = WinForms.DockStyle.Fill,
                 AutoScroll = true,
                 BackColor = ConsoleBackground,
-                Padding = new WinForms.Padding(0, 0, 8, 0)
+                Padding = ScaledPadding(0, 0, 8, 0)
             };
 
             var stack = new WinForms.TableLayoutPanel
@@ -227,12 +281,13 @@ namespace LandIndexTool
                 AutoSize = true,
                 ColumnCount = 1,
                 RowCount = 3,
-                BackColor = ConsoleBackground
+                BackColor = ConsoleBackground,
+                MinimumSize = new Size(Scale(LeftPanelMinWidth - 24), 0)
             };
             stack.ColumnStyles.Add(new WinForms.ColumnStyle(WinForms.SizeType.Percent, 100));
-            stack.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, 292));
-            stack.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, 430));
-            stack.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, 168));
+            stack.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(480)));
+            stack.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(610)));
+            stack.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(300)));
             scroll.Controls.Add(stack);
 
             stack.Controls.Add(CreateSectionCard("指标规则区", CreateRulesContent(), "绿地、非机动车、机动车与绿化折算系数"), 0, 0);
@@ -248,11 +303,11 @@ namespace LandIndexTool
                 Dock = WinForms.DockStyle.Fill,
                 ColumnCount = 1,
                 RowCount = 3,
-                Padding = new WinForms.Padding(12, 2, 12, 10),
+                Padding = ScaledPadding(12, 2, 12, 10),
                 BackColor = CardBackground
             };
-            container.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, 150));
-            container.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, 62));
+            container.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(220)));
+            container.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(100)));
             container.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 100));
 
             var ruleGrid = CreateRulePanel();
@@ -279,7 +334,7 @@ namespace LandIndexTool
                 TextAlign = ContentAlignment.MiddleLeft,
                 ForeColor = MutedTextColor,
                 Font = new Font("Microsoft YaHei UI", 8.5F),
-                Padding = new WinForms.Padding(2, 4, 2, 0)
+                Padding = ScaledPadding(2, 4, 2, 0)
             }, 0, 2);
             return container;
         }
@@ -287,13 +342,14 @@ namespace LandIndexTool
         private WinForms.Control CreateLayerContent()
         {
             var layerGrid = CreateGridPanel(2, 6);
-            layerGrid.Padding = new WinForms.Padding(12, 4, 12, 10);
+            layerGrid.Padding = ScaledPadding(12, 4, 12, 10);
             var unitPanel = new WinForms.FlowLayoutPanel
             {
                 Dock = WinForms.DockStyle.Fill,
                 FlowDirection = WinForms.FlowDirection.LeftToRight,
                 WrapContents = false,
-                BackColor = CardBackground
+                BackColor = CardBackground,
+                Padding = ScaledPadding(0, 6, 0, 0)
             };
             _unitMmButton = new WinForms.RadioButton { Text = "MM", AutoSize = true, Checked = !string.Equals(Settings.UnitMode, "M", StringComparison.OrdinalIgnoreCase) };
             _unitMButton = new WinForms.RadioButton { Text = "M", AutoSize = true, Checked = string.Equals(Settings.UnitMode, "M", StringComparison.OrdinalIgnoreCase) };
@@ -321,14 +377,14 @@ namespace LandIndexTool
                 Dock = WinForms.DockStyle.Fill,
                 RowCount = 3,
                 ColumnCount = 3,
-                Padding = new WinForms.Padding(12, 6, 12, 10),
+                Padding = ScaledPadding(12, 6, 12, 10),
                 BackColor = CardBackground
             };
             infoLabelGrid.ColumnStyles.Add(new WinForms.ColumnStyle(WinForms.SizeType.Percent, 34));
             infoLabelGrid.ColumnStyles.Add(new WinForms.ColumnStyle(WinForms.SizeType.Percent, 33));
             infoLabelGrid.ColumnStyles.Add(new WinForms.ColumnStyle(WinForms.SizeType.Percent, 33));
-            infoLabelGrid.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, 42));
-            infoLabelGrid.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, 58));
+            infoLabelGrid.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(48)));
+            infoLabelGrid.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(InputRowHeight)));
             infoLabelGrid.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 100));
             _showInfoLabelsBox = new WinForms.CheckBox
             {
@@ -337,7 +393,7 @@ namespace LandIndexTool
                 Dock = WinForms.DockStyle.Fill,
                 AutoSize = true,
                 ForeColor = TextColor,
-                Margin = new WinForms.Padding(4, 8, 8, 4)
+                Margin = ScaledPadding(4, 8, 8, 4)
             };
             infoLabelGrid.Controls.Add(_showInfoLabelsBox, 0, 0);
             infoLabelGrid.SetColumnSpan(_showInfoLabelsBox, 3);
@@ -352,7 +408,7 @@ namespace LandIndexTool
                 Dock = WinForms.DockStyle.Fill,
                 TextAlign = ContentAlignment.MiddleLeft,
                 ForeColor = MutedTextColor,
-                Margin = new WinForms.Padding(0, 8, 4, 4)
+                Margin = ScaledPadding(0, 8, 4, 4)
             }, 0, 2);
             infoLabelGrid.SetColumnSpan(infoLabelGrid.GetControlFromPosition(0, 2), 3);
             return infoLabelGrid;
@@ -393,7 +449,7 @@ namespace LandIndexTool
             {
                 Dock = WinForms.DockStyle.Fill,
                 FlowDirection = WinForms.FlowDirection.RightToLeft,
-                Padding = new WinForms.Padding(0, 14, 0, 0),
+                Padding = ScaledPadding(0, 14, 0, 0),
                 BackColor = ConsoleBackground
             };
 
@@ -419,7 +475,7 @@ namespace LandIndexTool
                 Dock = WinForms.DockStyle.Fill,
                 BackColor = CardBackground,
                 BorderColor = BorderColor,
-                Margin = new WinForms.Padding(0, 0, 0, 10)
+                Margin = ScaledPadding(0, 0, 0, 10)
             };
         }
 
@@ -434,7 +490,7 @@ namespace LandIndexTool
                 RowCount = 2,
                 BackColor = CardBackground
             };
-            layout.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, 58));
+            layout.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(SectionHeaderHeight)));
             layout.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 100));
             card.Controls.Add(layout);
 
@@ -443,7 +499,7 @@ namespace LandIndexTool
                 Dock = WinForms.DockStyle.Fill,
                 ColumnCount = 1,
                 RowCount = 2,
-                Padding = new WinForms.Padding(14, 8, 14, 2),
+                Padding = ScaledPadding(14, 8, 14, 2),
                 BackColor = CardBackground
             };
             header.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 58));
@@ -473,8 +529,8 @@ namespace LandIndexTool
         private static WinForms.Control CreateMetricCard(string title, string subtitle, out WinForms.Label valueLabel)
         {
             var card = CreateCardShell();
-            card.Margin = new WinForms.Padding(0, 0, 10, 0);
-            card.Padding = new WinForms.Padding(16, 10, 16, 10);
+            card.Margin = ScaledPadding(0, 0, 10, 0);
+            card.Padding = ScaledPadding(16, 10, 16, 10);
             var layout = new WinForms.TableLayoutPanel
             {
                 Dock = WinForms.DockStyle.Fill,
@@ -482,9 +538,9 @@ namespace LandIndexTool
                 RowCount = 3,
                 BackColor = CardBackground
             };
-            layout.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, 24));
+            layout.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(28)));
             layout.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 100));
-            layout.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, 22));
+            layout.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(26)));
             card.Controls.Add(layout);
 
             layout.Controls.Add(new WinForms.Label
@@ -520,13 +576,13 @@ namespace LandIndexTool
             var button = new WinForms.Button
             {
                 Text = text,
-                Width = primary ? 112 : 96,
-                Height = 34,
+                Width = Scale(primary ? 112 : 96),
+                Height = Scale(38),
                 BackColor = primary ? PrimaryColor : CardBackground,
                 ForeColor = primary ? Color.White : TextColor,
                 FlatStyle = WinForms.FlatStyle.Flat,
                 Font = new Font("Microsoft YaHei UI", 9.5F, primary ? FontStyle.Bold : FontStyle.Regular),
-                Margin = new WinForms.Padding(8, 0, 0, 0),
+                Margin = ScaledPadding(8, 0, 0, 0),
                 UseVisualStyleBackColor = false
             };
             button.FlatAppearance.BorderColor = primary ? PrimaryColor : BorderColor;
@@ -541,8 +597,9 @@ namespace LandIndexTool
                 Dock = WinForms.DockStyle.Fill,
                 ColumnCount = columns,
                 RowCount = rows,
-                Padding = new WinForms.Padding(8),
-                BackColor = CardBackground
+                Padding = ScaledPadding(8),
+                BackColor = CardBackground,
+                MinimumSize = new Size(0, Scale(rows * InputRowHeight + 16))
             };
             for (var i = 0; i < columns; i++)
             {
@@ -564,8 +621,9 @@ namespace LandIndexTool
                 Dock = WinForms.DockStyle.Fill,
                 ColumnCount = 2,
                 RowCount = 3,
-                Padding = new WinForms.Padding(0),
-                BackColor = CardBackground
+                Padding = ScaledPadding(0),
+                BackColor = CardBackground,
+                MinimumSize = new Size(0, Scale(3 * InputRowHeight))
             };
             panel.ColumnStyles.Add(new WinForms.ColumnStyle(WinForms.SizeType.Percent, 50));
             panel.ColumnStyles.Add(new WinForms.ColumnStyle(WinForms.SizeType.Percent, 50));
@@ -582,10 +640,11 @@ namespace LandIndexTool
                 Dock = WinForms.DockStyle.Fill,
                 ColumnCount = 1,
                 RowCount = 2,
-                Padding = new WinForms.Padding(0, 0, 12, 4),
-                BackColor = CardBackground
+                Padding = ScaledPadding(0, 0, 12, 4),
+                BackColor = CardBackground,
+                MinimumSize = new Size(0, Scale(InputRowHeight))
             };
-            inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, 21));
+            inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(InputLabelHeight)));
             inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 100));
             inner.Controls.Add(new WinForms.Label
             {
@@ -595,11 +654,11 @@ namespace LandIndexTool
                 ForeColor = TextColor,
                 Font = new Font("Microsoft YaHei UI", 8.4F),
                 AutoEllipsis = true,
-                Margin = new WinForms.Padding(0)
+                Margin = ScaledPadding(0)
             }, 0, 0);
 
             var box = CreateInputTextBox(value);
-            box.Margin = new WinForms.Padding(0, 2, 0, 2);
+            box.Margin = ScaledPadding(0, 2, 0, 2);
             inner.Controls.Add(box, 0, 1);
             panel.Controls.Add(inner, column, row);
             return box;
@@ -612,9 +671,10 @@ namespace LandIndexTool
                 Dock = WinForms.DockStyle.Fill,
                 RowCount = 2,
                 ColumnCount = 1,
-                Padding = new WinForms.Padding(4)
+                Padding = ScaledPadding(4),
+                MinimumSize = new Size(0, Scale(InputRowHeight))
             };
-            inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, 24));
+            inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(InputLabelHeight)));
             inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 100));
             inner.Controls.Add(new WinForms.Label
             {
@@ -624,7 +684,7 @@ namespace LandIndexTool
                 ForeColor = TextColor,
                 Font = new Font("Microsoft YaHei UI", 8.6F)
             }, 0, 0);
-            control.Margin = new WinForms.Padding(0, 2, 0, 0);
+            control.Margin = ScaledPadding(0, 2, 0, 0);
             inner.Controls.Add(control, 0, 1);
             panel.Controls.Add(inner, column, row);
         }
@@ -644,10 +704,11 @@ namespace LandIndexTool
                 Dock = WinForms.DockStyle.Fill,
                 RowCount = 2,
                 ColumnCount = 1,
-                Padding = new WinForms.Padding(0, 0, 12, 2),
-                BackColor = CardBackground
+                Padding = ScaledPadding(0, 0, 12, 2),
+                BackColor = CardBackground,
+                MinimumSize = new Size(0, Scale(InputRowHeight))
             };
-            inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, 22));
+            inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Absolute, Scale(InputLabelHeight)));
             inner.RowStyles.Add(new WinForms.RowStyle(WinForms.SizeType.Percent, 100));
             inner.Controls.Add(new WinForms.Label
             {
@@ -658,7 +719,7 @@ namespace LandIndexTool
                 Font = new Font("Microsoft YaHei UI", 8.4F),
                 AutoEllipsis = true
             }, 0, 0);
-            box.Margin = new WinForms.Padding(0, 2, 0, 2);
+            box.Margin = ScaledPadding(0, 2, 0, 2);
             inner.Controls.Add(box, 0, 1);
             panel.Controls.Add(inner, column, 1);
             return box;
@@ -670,9 +731,10 @@ namespace LandIndexTool
             {
                 Dock = WinForms.DockStyle.Fill,
                 Text = value,
-                Multiline = true,
-                Height = 30,
-                MinimumSize = new Size(80, 30),
+                AutoSize = false,
+                Multiline = false,
+                Height = Scale(InputBoxHeight),
+                MinimumSize = ScaledSize(96, InputBoxHeight),
                 BorderStyle = WinForms.BorderStyle.FixedSingle,
                 Font = new Font("Microsoft YaHei UI", 9.5F),
                 ForeColor = TextColor,
@@ -798,9 +860,9 @@ namespace LandIndexTool
             grid.BorderStyle = WinForms.BorderStyle.None;
             grid.GridColor = BorderColor;
             grid.EnableHeadersVisualStyles = false;
-            grid.RowHeadersWidth = 28;
-            grid.RowTemplate.Height = 28;
-            grid.ColumnHeadersHeight = 32;
+            grid.RowHeadersWidth = Scale(28);
+            grid.RowTemplate.Height = Scale(28);
+            grid.ColumnHeadersHeight = Scale(32);
             grid.ColumnHeadersDefaultCellStyle.BackColor = HeaderBackground;
             grid.ColumnHeadersDefaultCellStyle.ForeColor = TextColor;
             grid.ColumnHeadersDefaultCellStyle.Font = new Font("Microsoft YaHei UI", 9F, FontStyle.Bold);
