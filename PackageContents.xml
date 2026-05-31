@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationPackage
+  SchemaVersion="1.0"
+  AutodeskProduct="AutoCAD"
+  ProductType="Application"
+  Name="Building Area Tool"
+  AppVersion="1.0.0"
+  Description="Building footprint and gross floor area table tool for AutoCAD."
+  Author="Codex">
+  <CompanyDetails Name="Personal" />
+  <Components Description="Building Area Tool">
+    <RuntimeRequirements OS="Win64" Platform="AutoCAD*" SeriesMin="R24.0" SeriesMax="R24.3" />
+    <ComponentEntry
+      AppName="BuildingAreaTool"
+      Version="1.0.0"
+      ModuleName="./Contents/Win64/BuildingAreaTool.dll"
+      AppDescription="Building footprint and gross floor area table tool."
+      LoadOnAutoCADStartup="True"
+      LoadOnCommandInvocation="True">
+      <Commands GroupName="BuildingAreaTool">
+        <Command Global="JZMJTABLE" Local="JZMJTABLE" />
+        <Command Global="JZMJAUTO" Local="JZMJAUTO" />
+        <Command Global="JZMJADD" Local="JZMJADD" />
+        <Command Global="JZMJUPDATE" Local="JZMJUPDATE" />
+        <Command Global="JZMJHELP" Local="JZMJHELP" />
+      </Commands>
+    </ComponentEntry>
+    <ComponentEntry
+      AppName="BuildingAreaLiveUpdater"
+      Version="1.0.0"
+      ModuleName="./Contents/Win64/BuildingAreaLiveUpdater.dll"
+      AppDescription="Live refresh helper for Building Area Tool."
+      LoadOnAutoCADStartup="True"
+      LoadOnCommandInvocation="True">
+      <Commands GroupName="BuildingAreaLiveUpdater">
+        <Command Global="JZMJLIVEON" Local="JZMJLIVEON" />
+        <Command Global="JZMJREFRESH" Local="JZMJREFRESH" />
+      </Commands>
+    </ComponentEntry>
+    <ComponentEntry
+      AppName="LandIndexTool"
+      Version="1.0.0"
+      ModuleName="./Contents/Win64/LandIndexTool.dll"
+      AppDescription="Scan configured land index layers and generate land index tables."
+      LoadOnAutoCADStartup="True"
+      LoadOnCommandInvocation="True">
+      <Commands GroupName="LandIndexTool">
+        <Command Global="dulang1" Local="dulang1" />
+        <Command Global="JZMJYDUPDATE" Local="JZMJYDUPDATE" />
+        <Command Global="JZMJYDHELP" Local="JZMJYDHELP" />
+      </Commands>
+    </ComponentEntry>
+  </Components>
+</ApplicationPackage>

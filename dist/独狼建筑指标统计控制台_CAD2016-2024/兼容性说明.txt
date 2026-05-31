@@ -1,0 +1,29 @@
+兼容性说明
+
+本发布包目标范围：AutoCAD 2016-2024，64 位。
+
+构建方式：
+- 编译引用：C:\Program Files\Autodesk\AutoCAD 2016\AcMgd.dll / AcDbMgd.dll / AcCoreMgd.dll
+- AutoCAD API 引用版本：20.1.0.0
+- .NET 目标框架：.NET Framework 4.7.2
+- Bundle 范围：SeriesMin=R20.1，SeriesMax=R24.3
+
+对应 AutoCAD 大版本：
+- R20.1：AutoCAD 2016
+- R21.0：AutoCAD 2017
+- R22.0：AutoCAD 2018
+- R23.0：AutoCAD 2019
+- R23.1：AutoCAD 2020
+- R24.0：AutoCAD 2021
+- R24.1：AutoCAD 2022
+- R24.2：AutoCAD 2023
+- R24.3：AutoCAD 2024
+
+注意：
+1. CAD2016 电脑如果没有 .NET Framework 4.7.2 或更高版本，可能无法加载。
+2. AutoCAD 2025 不适用本包。CAD2025 需要单独 .NET 8 版本。
+3. 如 AutoCAD 安全加载阻止插件，请将插件路径加入受信任路径，或右键 ZIP/DLL 解除锁定。
+4. 一键安装脚本会自动写入当前用户 AutoCAD 配置下的 TRUSTEDPATHS。若公司电脑禁用脚本，请手动添加：
+   %APPDATA%\Autodesk\ApplicationPlugins\DulangLandIndexTool.bundle
+   %APPDATA%\Autodesk\ApplicationPlugins\DulangLandIndexTool.bundle\Contents\Win64
+5. 安装或卸载前需要关闭 AutoCAD/T20，避免 DLL 被占用。
