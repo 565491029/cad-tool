@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LandIndexPlugin.cs" />
+    <Compile Include="LandIndexLicense.cs" />
     <Compile Include="LandIndexSettings.cs" />
     <Compile Include="LandIndexSettingsForm.cs" />
   </ItemGroup>

@@ -175,6 +175,10 @@ namespace LandIndexTool
             var doc = Application.DocumentManager.MdiActiveDocument;
             var ed = doc.Editor;
             var db = doc.Database;
+            if (!EnsureLicensed(ed))
+            {
+                return;
+            }
 
             var settings = LandIndexSettingsStore.Load();
             ApplySettings(settings);
@@ -315,6 +319,12 @@ namespace LandIndexTool
         public void UpdateLandIndexTable()
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
+            var ed = doc.Editor;
+            if (!EnsureLicensed(ed))
+            {
+                return;
+            }
+
             using (doc.LockDocument())
             using (var tr = doc.Database.TransactionManager.StartTransaction())
             {
@@ -387,7 +397,35 @@ namespace LandIndexTool
                 "\n1fjdc 图层闭合 PLINE 计入非机动车㎡，1ld/1zcz/1wm1/1wm2/1wm3 图层闭合 PLINE 按折算系数计入绿地㎡，1cs 图层文字计入层数。" +
                 "\n" + GetCreateCommandName() + "  生成指标表" +
                 "\n" + GetUpdateCommandName() + " 刷新指标表" +
+                "\nDULANGID 查看本机机器码，DULANGLICENSE 查看授权状态。" +
                 "\n生成时会弹出设置窗口；可在表格中手动改“类型、地面、室内”，刷新时会保留这些手填项；机动车（个）=地面+室内；层数优先读取层数图层。");
+        }
+
+        [CommandMethod("DULANGID")]
+        public void ShowMachineCode()
+        {
+            var ed = Application.DocumentManager.MdiActiveDocument.Editor;
+            ed.WriteMessage("\n独狼建筑指标统计机器码：" + LandIndexLicense.GetMachineCode());
+            ed.WriteMessage("\n输入 DULANGLICENSE 可查看授权文件位置和授权状态。");
+        }
+
+        [CommandMethod("DULANGLICENSE")]
+        public void ShowLicenseStatus()
+        {
+            Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(LandIndexLicense.BuildStatusMessage());
+        }
+
+        private static bool EnsureLicensed(Editor ed)
+        {
+            var status = LandIndexLicense.Validate();
+            if (status.IsValid)
+            {
+                return true;
+            }
+
+            ed.WriteMessage(LandIndexLicense.BuildStatusMessage());
+            ed.WriteMessage("\n未授权，命令已取消。请把机器码发给插件作者生成 DulangLicense.lic。");
+            return false;
         }
 
         private static void Attach()
@@ -506,6 +544,12 @@ namespace LandIndexTool
 
             var doc = Application.DocumentManager.MdiActiveDocument;
             if (doc == null)
+            {
+                _pendingRefresh = false;
+                return;
+            }
+
+            if (!LandIndexLicense.Validate().IsValid)
             {
                 _pendingRefresh = false;
                 return;
@@ -1855,7 +1899,7 @@ namespace LandIndexTool
                 return result;
             }
 
-            var hasBuildingColumns = table.Columns.Count > 16 && GetCellText(table, DetailHeaderRow, 6).Contains("容积率");
+            var hasBuildingColumns = table.Columns.Count >= DetailColumnCount;
             var reorderedColumns = !hasBuildingColumns && table.Columns.Count > 14 && GetCellText(table, DetailHeaderRow, 4).Contains("容积率");
             var floorsColumn = hasBuildingColumns ? 7 : (reorderedColumns ? 5 : 4);
             var greenRateColumn = hasBuildingColumns ? 11 : (reorderedColumns ? 9 : 8);

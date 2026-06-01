@@ -1,0 +1,28 @@
+独狼建筑指标统计控制台 - 授权生成说明
+
+这个文件夹只给插件作者使用，不要打包给客户。
+
+客户安装插件后，在 CAD 命令行输入：
+
+DULANGID
+
+把显示的机器码发给你。然后在本机仓库目录运行：
+
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\New-DulangLicense.ps1 -Customer "客户名称" -Machine "客户机器码" -Expires "2027-12-31" -Output ".\DulangLicense.lic"
+
+永久授权可以使用：
+
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\New-DulangLicense.ps1 -Customer "客户名称" -Machine "客户机器码" -Expires "NEVER" -Output ".\DulangLicense.lic"
+
+通用授权可以使用 Machine=ANY，但保护性更弱：
+
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\New-DulangLicense.ps1 -Customer "客户名称" -Machine "ANY" -Expires "2027-12-31" -Output ".\DulangLicense.lic"
+
+把生成的 DulangLicense.lic 发给客户。客户可以把它放在安装包解压后的根目录，然后重新运行“一键安装到当前用户.bat”；也可以手动复制到：
+
+%APPDATA%\Autodesk\ApplicationPlugins\DulangLandIndexTool.bundle\Contents\Win64\DulangLicense.lic
+
+注意：
+1. 这是轻量保护，不是强加密防破解。
+2. 不要把 tools 文件夹发给客户。
+3. 不要把 DulangLicense.lic 提交到 GitHub。

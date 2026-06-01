@@ -103,6 +103,13 @@ if (Test-Path $dst) {
 
 Copy-Item -LiteralPath $src -Destination $dst -Recurse -Force
 
+$licenseFromPackageRoot = Join-Path $scriptRoot "DulangLicense.lic"
+if (Test-Path $licenseFromPackageRoot) {
+    $licenseTarget = Join-Path $dst "Contents\Win64\DulangLicense.lic"
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $licenseTarget) | Out-Null
+    Copy-Item -LiteralPath $licenseFromPackageRoot -Destination $licenseTarget -Force
+}
+
 Get-ChildItem -LiteralPath $dst -Recurse -File -ErrorAction SilentlyContinue |
     ForEach-Object {
         try { Unblock-File -LiteralPath $_.FullName -ErrorAction SilentlyContinue } catch { }

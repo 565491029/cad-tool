@@ -7,6 +7,14 @@
 4. 重新打开 AutoCAD。
 5. 输入命令：dulang1
 
+授权：
+1. 第一次安装后，在 CAD 命令行输入 DULANGID。
+2. 把显示的机器码发给插件作者。
+3. 收到 DulangLicense.lic 后，把它放到本安装包根目录，再重新运行“一键安装到当前用户.bat”。
+4. 也可以手动复制到：
+   %APPDATA%\Autodesk\ApplicationPlugins\DulangLandIndexTool.bundle\Contents\Win64\DulangLicense.lic
+5. 输入 DULANGLICENSE 可查看授权状态。
+
 卸载：
 1. 关闭 AutoCAD。
 2. 双击“卸载插件.bat”。
